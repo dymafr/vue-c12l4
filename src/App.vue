@@ -21,8 +21,8 @@
     <div class="p-20">
       <h3>Liste des utilisateurs</h3>
       <ul>
-        <li v-for="user in state.users">
-          <p class="mr-10">{{ user.name }} - {{ user.email }}</p>
+        <li class="mb-10" v-for="user in state.users">
+          <span class="mr-10">{{ user.name }} - {{ user.email }}</span>
           <button
             @click="deleteUser(user._id)"
             type="button"
@@ -47,10 +47,10 @@ interface User {
   _id?: string;
 }
 
-const state = reactive({
+const state = reactive<{ users: User[]; selectedUser: User | null }>({
   users: [],
+  selectedUser: null,
 });
-
 const { handleSubmit, resetForm } = useForm();
 
 const mySubmit = handleSubmit(async (value) => {
@@ -62,7 +62,7 @@ const mySubmit = handleSubmit(async (value) => {
         'Content-Type': 'application/json',
       },
     });
-    const user = await response.json();
+    const user: User = await response.json();
     state.users.push(user);
     resetForm();
   } catch (err) {
@@ -88,12 +88,9 @@ async function fetchUsers() {
 async function deleteUser(userId?: string) {
   try {
     if (userId) {
-      const response = await fetch(
-        `https://restapi.fr/api/vueusers?id=${userId}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      await fetch(`https://restapi.fr/api/vueusers?id=${userId}`, {
+        method: 'DELETE',
+      });
       state.users = state.users.filter((user) => user._id !== userId);
     }
   } catch (err) {
