@@ -21,8 +21,14 @@
     <div class="p-20">
       <h3>Liste des utilisateurs</h3>
       <ul>
-        <li class="mb-10" v-for="user in state.users">
-          <span class="mr-10">{{ user.name }} - {{ user.email }}</span>
+        <li
+          @click="state.selectedUser = user"
+          class="mb-10 d-flex"
+          v-for="user in state.users"
+        >
+          <span class="mr-10 flex-fill"
+            >{{ user.name }} - {{ user.email }}</span
+          >
           <button
             @click="deleteUser(user._id)"
             type="button"
@@ -38,7 +44,7 @@
 
 <script setup lang="ts">
 import { useForm, useField } from 'vee-validate';
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 
 interface User {
   name: string;
@@ -47,7 +53,10 @@ interface User {
   _id?: string;
 }
 
-const state = reactive<{ users: User[]; selectedUser: User | null }>({
+const state = reactive<{
+  users: User[];
+  selectedUser: User | null;
+}>({
   users: [],
   selectedUser: null,
 });
@@ -85,6 +94,8 @@ async function fetchUsers() {
   }
 }
 
+fetchUsers();
+
 async function deleteUser(userId?: string) {
   try {
     if (userId) {
@@ -98,7 +109,17 @@ async function deleteUser(userId?: string) {
   }
 }
 
-fetchUsers();
+watch(
+  () => state.selectedUser,
+  (user: User | null) => {
+    if (user) {
+      nameValue.value = user.name;
+      emailValue.value = user.email;
+    } else {
+      resetForm();
+    }
+  }
+);
 </script>
 
 <style lang="scss">
