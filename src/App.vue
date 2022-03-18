@@ -30,7 +30,7 @@
             >{{ user.name }} - {{ user.email }}</span
           >
           <button
-            @click="deleteUser(user._id)"
+            @click.stop="deleteUser(user._id)"
             type="button"
             class="btn btn-danger"
           >
@@ -64,15 +64,32 @@ const { handleSubmit, resetForm } = useForm();
 
 const mySubmit = handleSubmit(async (value) => {
   try {
-    const response = await fetch('https://restapi.fr/api/vueusers', {
-      method: 'POST',
-      body: JSON.stringify(value),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const user: User = await response.json();
-    state.users.push(user);
+    if (state.selectedUser) {
+      const response = await fetch(
+        `https://restapi.fr/api/vueusers?id=${state.selectedUser._id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(value),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      state.users = state.users.map((u) => {
+        return u._id === user._id ? user : u;
+      });
+      state.selectedUser = null;
+    } else {
+      const response = await fetch('https://restapi.fr/api/vueusers', {
+        method: 'POST',
+        body: JSON.stringify(value),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const user: User = await response.json();
+      state.users.push(user);
+    }
     resetForm();
   } catch (err) {
     console.error(err);
@@ -116,7 +133,8 @@ watch(
       nameValue.value = user.name;
       emailValue.value = user.email;
     } else {
-      resetForm();
+      nameValue.value = '';
+      emailValue.value = '';
     }
   }
 );
