@@ -80,9 +80,8 @@ const mySubmit = handleSubmit(async (value) => {
           },
         }
       );
-      state.users = state.users.map((u) => {
-        return u._id === user._id ? user : u;
-      });
+      const user: User = await response.json();
+      state.users = state.users.map((u) => (u._id === user._id ? user : u));
       state.selectedUser = null;
     } else {
       const response = await fetch('https://restapi.fr/api/vueusers', {
