@@ -4,6 +4,7 @@
       <h3 class="mb-10">Formulaire</h3>
       <form @submit="mySubmit">
         <input
+          ref="name"
           v-model="nameValue"
           class="mr-10"
           type="text"
@@ -44,7 +45,7 @@
 
 <script setup lang="ts">
 import { useForm, useField } from 'vee-validate';
-import { reactive, watch } from 'vue';
+import { reactive, ref, watch, onMounted } from 'vue';
 
 interface User {
   name: string;
@@ -60,6 +61,10 @@ const state = reactive<{
   users: [],
   selectedUser: null,
 });
+const name = ref<HTMLInputElement | null>(null);
+
+onMounted(() => name.value?.focus());
+
 const { handleSubmit, resetForm } = useForm();
 
 const mySubmit = handleSubmit(async (value) => {
@@ -91,6 +96,7 @@ const mySubmit = handleSubmit(async (value) => {
       state.users.push(user);
     }
     resetForm();
+    name.value?.focus();
   } catch (err) {
     console.error(err);
   }
